@@ -6,6 +6,8 @@ POLICIES :=policies
 # So we know where we are.
 WD := $(shell pwd)
 BIN := $(WD)/bin
+UNAME:= $(shell sh -c 'uname -s 2>/dev/null || echo not')
+UNAME:= $(shell echo $(UNAME) | tr '[:upper:]' '[:lower:]')
 # Pin some terraform details. For now amd64 only on darwin and linux (though
 # freebsd, openbsd, solaris, windows may also work). In a few years we'll
 # prolly target ARM. No ARM support at AWS yet but Azure is an early adopter.
@@ -32,7 +34,7 @@ setup_organizations:
 		-e AWS_ACCESS_KEY_ID \
 		-v $(CW)/:/usr/src/app \
 		boot-service:latest \
-		python boot-service/app.py
+		python boot-service/organizations.py
 
 update_policies:
 	docker run --rm -it \
@@ -42,6 +44,24 @@ update_policies:
 		-v $(CW)/:/usr/src/app \
 		boot-service:latest \
 		python boot-service/update_policies.py
+
+root:
+	docker run --rm -it \
+		-e AWS_DEFAULT_REGION \
+		-e AWS_SECRET_ACCESS_KEY \
+		-e AWS_ACCESS_KEY_ID \
+		-v $(CW)/:/usr/src/app \
+		boot-service:latest \
+		python boot-service/root.py
+
+user:
+	docker run --rm -it \
+		-e AWS_DEFAULT_REGION \
+		-e AWS_SECRET_ACCESS_KEY \
+		-e AWS_ACCESS_KEY_ID \
+		-v $(CW)/:/usr/src/app \
+		boot-service:latest \
+		python boot-service/user.py
 
 # install installs the terraform binary
 install:
@@ -62,3 +82,31 @@ install:
 
 build_container:
 	docker build . -t boot-service:latest
+
+
+root_init:
+	(cd root && ../bin/terraform init)
+
+root_plan:
+	(cd root && ../bin/terraform plan)
+
+root_apply:
+	(cd root && ../bin/terraform apply)
+
+root_destroy:
+	(cd root && ../bin/terraform destroy)
+
+development_state:
+	(cd development && ../bin/terraform apply -target aws_dynamodb_table.state_lock)
+
+development_init:
+	(cd development && ../bin/terraform init)
+
+development_plan:
+	(cd development && ../bin/terraform plan)
+
+development_apply:
+	(cd development && ../bin/terraform apply)
+
+development_destroy:
+	(cd development && ../bin/terraform destroy)

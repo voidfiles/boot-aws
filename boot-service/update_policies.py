@@ -1,10 +1,8 @@
 import logging
 
 import boto3
-import json
 
-from botocore.exceptions import ClientError
-
+import api
 from consts import OUS
 
 logger = logging.getLogger(__name__)
@@ -18,7 +16,9 @@ if __name__ == "__main__":
     )
     policies_by_name = {x["Name"]: x for x in response.get("Policies", [])}
 
-    response = org_client.update_policy(
-        PolicyId=policies_by_name[OUS.USER.POLICY_NAME]["Id"],
-        Content=json.dumps(OUS.USER.POLICY_CONTENT),
-    )
+    api.update_policy(
+        org_client, policies_by_name[OUS.USER.POLICY_NAME], OUS.USER)
+
+    for env, env_ou in OUS.ENVIRONMENTS.items():
+        api.update_policy(
+            org_client, policies_by_name[env_ou.POLICY_NAME], env_ou)

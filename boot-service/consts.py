@@ -5,31 +5,73 @@ import json
 CWD = os.path.dirname(os.path.realpath(__file__))
 
 
-def get_or_set(cls, file_name):
-    value = getattr(cls, '_POLICY_CONTENT', None)
-    if value:
-        return value
-
-    data = ""
-    with open(CWD + "/data/%s" % (file_name,)) as fd:
-        data = fd.read()
-
-    data = json.loads(data)
-
-    cls._POLICY_CONTENT = data
-
-    return data
+class OU(object):
+    @property
+    def POLICY_CONTENT(cls):
+        return {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Action": cls.account_allowed_actions,
+            "Resource": "*"
+          }]
+        }
 
 
-class UserOUDetails(object):
+class UserOUDetails(OU):
     NAME = "users"
     POLICY_NAME = "users_ou_policy"
     ROOT_NAME = "users-root"
+    EMAIL = "voidfiles+boot-users-root@gmail.com"
+    account_allowed_actions = [
+        "iam:*",
+        "sts:*",
+    ]
 
-    @property
-    def POLICY_CONTENT(cls):
-        return get_or_set(cls, "user_ou_policy.json")
+
+class DevelopmentOUDetails(OU):
+    NAME = "development"
+    POLICY_NAME = "development_ou_policy"
+    ROOT_NAME = "development-root"
+    EMAIL = "voidfiles+boot-development-root@gmail.com"
+    account_allowed_actions = [
+        "iam:*",
+        "sts:*",
+        "dynamodb:*",
+        "ec2:*",
+        "s3:*",
+        "kms:*",
+    ]
+
+
+class StagingOUDetails(OU):
+    NAME = "staging"
+    POLICY_NAME = "staging_ou_policy"
+    ROOT_NAME = "staging-root"
+    EMAIL = "voidfiles+boot-staging-root@gmail.com"
+    account_allowed_actions = [
+        "iam:*",
+    ]
+
+
+class ProductionOUDetails(OU):
+    NAME = "production"
+    POLICY_NAME = "production_ou_policy"
+    ROOT_NAME = "production-root"
+    EMAIL = "voidfiles+boot-production-root@gmail.com"
+    account_allowed_actions = [
+        "iam:*",
+    ]
 
 
 class OUS(object):
     USER = UserOUDetails()
+    ENVIRONMENTS = {
+        "development": DevelopmentOUDetails(),
+        "staging": StagingOUDetails(),
+        "production": ProductionOUDetails(),
+    }
+
+class CONF(object):
+    DOMAIN = "brntgarlic.com"
+    REGION = "us-west-2"
