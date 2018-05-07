@@ -1,3 +1,7 @@
+variable "domain_name" {
+  default = "development.brntgarlic.com"
+}
+
 variable "state_bucket_name" {
   default = "state.root.brntgarlic.com"
 }

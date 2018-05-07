@@ -18,12 +18,6 @@ resource "aws_iam_policy_attachment" "attach_admin_to_admin" {
   policy_arn = "${aws_iam_policy.admin_to_admin.arn}"
 }
 
-resource "aws_iam_saml_provider" "default" {
-  provider               = "aws.users_root"
-  name                   = "auth9"
-  saml_metadata_document = "${file("saml-metadata.xml")}"
-}
-
 data "aws_iam_policy_document" "admin_to_admin" {
   statement {
     actions = [

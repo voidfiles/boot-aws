@@ -41,6 +41,7 @@ class DevelopmentOUDetails(OU):
         "ec2:*",
         "s3:*",
         "kms:*",
+        "route53:*",
     ]
 
 
@@ -51,6 +52,12 @@ class StagingOUDetails(OU):
     EMAIL = "voidfiles+boot-staging-root@gmail.com"
     account_allowed_actions = [
         "iam:*",
+        "sts:*",
+        "dynamodb:*",
+        "ec2:*",
+        "s3:*",
+        "kms:*",
+        "route53:*",
     ]
 
 
@@ -61,6 +68,12 @@ class ProductionOUDetails(OU):
     EMAIL = "voidfiles+boot-production-root@gmail.com"
     account_allowed_actions = [
         "iam:*",
+        "sts:*",
+        "dynamodb:*",
+        "ec2:*",
+        "s3:*",
+        "kms:*",
+        "route53:*",
     ]
 
 

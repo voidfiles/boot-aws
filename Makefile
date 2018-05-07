@@ -34,7 +34,7 @@ setup_organizations:
 		-e AWS_ACCESS_KEY_ID \
 		-v $(CW)/:/usr/src/app \
 		boot-service:latest \
-		python boot-service/organizations.py
+		python boot-service/organizations.py | tee root/terraform.tfvars
 
 update_policies:
 	docker run --rm -it \
@@ -79,13 +79,20 @@ install:
 	echo -n "Installed terraform: " &&  $(BIN)/terraform --version
 	echo "Done..."
 
-
 build_container:
 	docker build . -t boot-service:latest
 
+root_state_init:
+	(cd root_state && ../bin/terraform init)
+
+root_state_plan:
+	(cd root_state && ../bin/terraform plan -var-file=../root/terraform.tfvars)
+
+root_state_apply:
+	(cd root_state && ../bin/terraform apply -var-file=../root/terraform.tfvars)
 
 root_init:
-	(cd root && ../bin/terraform init)
+	(cd root && ../bin/terraform init -reconfigure -backend-config=backend.tfvars)
 
 root_plan:
 	(cd root && ../bin/terraform plan)

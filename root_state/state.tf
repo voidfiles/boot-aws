@@ -137,7 +137,7 @@ resource "aws_s3_bucket_policy" "terraform_state_bucket" {
 }
 
 resource "aws_s3_bucket" "terraform_state_bucket" {
-  bucket = "${var.state_bucket_name}"
+  bucket = "${var.state_bucket_name}.${var.internal_domain}"
   acl    = "private"
   tags   = "${var.default_tags}"
 
@@ -283,4 +283,24 @@ resource "aws_kms_key" "terraform_encryption_key" {
 resource "aws_kms_alias" "terraform_encryption_key" {
   name          = "alias/terraform-encryption-key"
   target_key_id = "${aws_kms_key.terraform_encryption_key.key_id}"
+}
+
+data "template_file" "init" {
+  template = "${file("${path.module}/backend.tfvars.tpl")}"
+
+  vars {
+    state_bucket_name = "${var.state_bucket_name}"
+    internal_domain   = "${var.internal_domain}"
+    root_account_id   = "${var.root_account_id}"
+  }
+}
+
+resource "local_file" "backend_conf" {
+  content  = "${data.template_file.init.rendered}"
+  filename = "../root/backend.tfvars"
+}
+
+resource "local_file" "root_state_backend_conf" {
+  content  = "${data.template_file.init.rendered}"
+  filename = "./backend.tfvars"
 }

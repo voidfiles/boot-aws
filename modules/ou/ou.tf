@@ -28,3 +28,7 @@ resource "aws_iam_role_policy_attachment" "users_admin_role_attach" {
 resource "aws_iam_account_alias" "alias" {
   account_alias = "${var.root_id}-${var.environment}"
 }
+
+resource "aws_route53_zone" "ou_zone" {
+  name = "${var.environment}.${var.internal_domain}"
+}

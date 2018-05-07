@@ -3,6 +3,8 @@ download-cache
 __pycache__
 *.pyc
 .terraform
-*.tfstate
+*.tfstate*
 *.tfstate.backup
 bin
+root/terraform.tfvars
+root_state/backend.tfvars

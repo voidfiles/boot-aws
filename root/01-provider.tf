@@ -1,27 +1,26 @@
 variable "root_account_id" {
-  default = "813574615989"
+  description = "The root AWS account ID. Should be the only manual signup."
 }
 
 variable "root_id" {
-  default = "boot"
+  description = "The name of this service."
 }
 
 variable "users_account_id" {
-  default = "133430444242"
+  description = "The AWS account ID where users should be managed."
 }
 
 variable "environment_account_ids" {
-  type = "map"
+  description = "The AWS account ID of specific isolated functional enviornments."
+  type        = "map"
+}
 
-  default = {
-    development = "075487493871"
-    staging     = "200247690167"
-    production  = "662903516389"
-  }
+variable "internal_domain" {
+  description = "The internal domain name for this service."
 }
 
 variable "state_bucket_name" {
-  default = "state.root.brntgarlic.com"
+  default = "state.root"
 }
 
 variable "default_tags" {

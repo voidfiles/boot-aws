@@ -1,7 +1,7 @@
 import logging
 import pprint
 import boto3
-
+import json
 import api
 
 from consts import OUS
@@ -74,97 +74,15 @@ if __name__ == "__main__":
         ou = ous_by_name[env_ou.NAME]
         api.move_account_to_ou(org_client, account, root, ou)
 
-    # Establish the role in the users OU that allows users to assume roles
-    # In other OUs
-    # users_iam_client = api.get_client_for_account(
-    #     sts_client, users_ou_root_account, "iam")
-    #
-    # group = api.get_or_create_group(
-    #     users_iam_client,
-    #     'Admins',
-    # )
-    #
-    #
-    # for env, env_ou in OUS.ENVIRONMENTS.items():
-    #     account = accounts_by_name[env_ou.ROOT_NAME]
-    #     iam_client = api.get_client_for_account(
-    #         sts_client, account, "iam")
-    #
-    #     role = api.get_or_create_role(
-    #         iam_client,
-    #         'UsersAdminRole',
-    #         'This role allows you to administer everything in this account',
-    #         "arn:aws:iam::aws:policy/AdministratorAccess",
-    #         "arn:aws:iam::%s:root" % (users_ou_root_account["Id"]),
-    #     )
-    #     print("A role")
-    #     pprint.pprint(iam_client.list_role_policies(RoleName="UsersAdminRole"))
-    #
-    #
-    # identifiers = []
-    # for env, env_ou in OUS.ENVIRONMENTS.items():
-    #     account = accounts_by_name[env_ou.ROOT_NAME]
-    #     identifiers += [
-    #         "arn:aws:iam::%s:role/UsersAdminRole" % (account['Id'])
-    #     ]
-    #
-    # policy = api.update_or_create_policy(
-    #     users_iam_client,
-    #     'AdminToAdminRolePolicy',
-    #     {
-    #        "Version": "2012-10-17",
-    #        "Statement": [{
-    #            "Effect": "Allow",
-    #            "Action": "sts:AssumeRole",
-    #            "Resource": identifiers,
-    #         }, {
-    #             "Effect": "Allow",
-    #             "Action": [
-    #                "iam:ChangePassword",
-    #                "iam:CreateAccessKey",
-    #                "iam:CreateLoginProfile",
-    #                "iam:DeleteAccessKey",
-    #                "iam:DeleteLoginProfile",
-    #                "iam:GetLoginProfile",
-    #                "iam:ListAccessKeys",
-    #                "iam:UpdateAccessKey",
-    #                "iam:UpdateLoginProfile",
-    #                "iam:ListSigningCertificates",
-    #                "iam:DeleteSigningCertificate",
-    #                "iam:UpdateSigningCertificate",
-    #                "iam:UploadSigningCertificate",
-    #                "iam:ListSSHPublicKeys",
-    #                "iam:GetSSHPublicKey",
-    #                "iam:DeleteSSHPublicKey",
-    #                "iam:UpdateSSHPublicKey",
-    #                "iam:UploadSSHPublicKey"
-    #             ],
-    #             "Resource": "arn:aws:iam::%s:user/${aws:username}" % (
-    #                 users_ou_root_account["Id"])
-    #         }]
-    #     }
-    # )
-    #
-    # api.attach_group_policy(users_iam_client, "Admins", policy["Arn"])
+    output_data = {
+        "root_account_id": sts_client.get_caller_identity().get("Account"),
+        "users_account_id": users_ou_root_account["Id"],
+        "environment_account_ids": {},
+        "root_id": "boot",
+        "internal_domain": "brntgarlic.com",
+    }
 
-    print("Information for terraform")
-    print("users ou account_id: %s" % (users_ou_root_account["Id"]))
     for env, env_ou in OUS.ENVIRONMENTS.items():
-        print("%s ou account_id: %s" % (
-            env,
-            accounts_by_name[env_ou.ROOT_NAME]["Id"]
-        ))
-    # We need this in order to get into the users ou
-    # response = org_client.list_accounts()
-    #
-    # accounts = response.get("Accounts", [])
-    # pprint.pprint(accounts)
-    # accounts_by_name = {x["Name"]: x for x in accounts}
-    # users_ou_root_account = accounts_by_name[OUS.USER.ROOT_NAME]
-    # response = sts_client.assume_role(
-    #     RoleArn='arn:aws:iam::%s:role/OrganizationAccountAccessRole' % (
-    #         users_ou_root_account["Id"]),
-    #     RoleSessionName='establsh',
-    # )
-    # sub_org_client = get_client_for_role("organizations", response)
-    # response = sub_org_client.list_handshakes_for_account()
+        output_data['environment_account_ids'][env_ou.NAME] = accounts_by_name[env_ou.ROOT_NAME]["Id"]
+
+    print(json.dumps(output_data, indent=4, sort_keys=True))
