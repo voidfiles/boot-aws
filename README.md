@@ -11,8 +11,6 @@ You'll end up with the following.
   - Configured with an s3 bucket for state
   - A DynamoDB table ofr state lock
 
-
-
 ## Instructions
 
 ## Create an AWS Account

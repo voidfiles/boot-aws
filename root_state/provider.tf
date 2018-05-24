@@ -35,3 +35,5 @@ provider "aws" {
   alias  = "root"
   region = "us-west-2"
 }
+
+provider "tls" {}

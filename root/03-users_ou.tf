@@ -1,3 +1,8 @@
+resource "aws_iam_account_alias" "alias" {
+  provider      = "aws.users_root"
+  account_alias = "${var.root_id}-users"
+}
+
 resource "aws_iam_group" "admins" {
   provider = "aws.users_root"
 
@@ -136,6 +141,14 @@ output "user_alex_encrypted_password" {
 
 output "user_alex_key_fingerprint" {
   value = "${module.user_alex.key_fingerprint}"
+}
+
+output "user_alex_access_key_id" {
+  value = "${module.user_alex.access_key_id}"
+}
+
+output "user_alex_encrypted_secret_key" {
+  value = "${module.user_alex.encrypted_secret_key}"
 }
 
 resource "aws_iam_group_membership" "admins" {
